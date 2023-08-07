@@ -1,79 +1,80 @@
 using UnityEngine;
+using Player.InputControl;
+using Player.AnimationsControl;
 
-public class PlayerMovementControl : MonoBehaviour
+namespace Player.MovementControl
 {
-    #region Variables
-    private bool canMove = true;
-    [SerializeField] float moveSpeed;
-    private Vector3 moveVector = Vector3.zero;
+    [RequireComponent(typeof(PlayerInputControl))]
+    [RequireComponent(typeof(PlayerAnimationsControl))]
+    public class PlayerMovementControl : MonoBehaviour
+    {
+        #region Variables
+        private bool canMove = true;
+        [SerializeField] float moveSpeed;
+        private Vector3 moveVector = Vector3.zero;
 
-    private bool canJump = true;
-    private bool isJumping;
-    [SerializeField] float jumpPower;
-    [SerializeField] LayerMask groundLayer;
-    [SerializeField] Transform groundCheck;
-    float jumpCheckRadius = .1f;
-    float airControlFactor = 0.5f;
-    #endregion
-    #region Properties
-    private new Rigidbody rigidbody;
-    private Rigidbody Rigidbody { get { return (rigidbody == null) ? rigidbody = GetComponent<Rigidbody>() : rigidbody; } }
-    #endregion
-    #region MonoBehaviour Methods
-    private void FixedUpdate()
-    {
-        PlayerMove();
-        CheckJumping();
-        Debug.Log("ground " + IsGrounded());
-    }
-    #endregion
-    #region My Methods
-    public void SetMoveVector(Vector2 moveVector)
-    {
-        if (canMove)
+        private bool canJump = true;
+        private bool isJumping;
+        [SerializeField] float jumpPower;
+        [SerializeField] LayerMask groundLayer;
+        [SerializeField] Transform groundCheck;
+        const float JUMP_CHECK_RADIUS = .1f;
+        const float AIR_CONTROL_FACTOR = .5f;
+
+        #endregion
+        #region Properties
+        private Rigidbody rigidbody;
+        private Rigidbody Rigidbody { get { return (rigidbody == null) ? rigidbody = GetComponent<Rigidbody>() : rigidbody; } }
+        private PlayerAnimationsControl animationsControl;
+        private PlayerAnimationsControl AnimationsControl { get { return (animationsControl == null) ? animationsControl = GetComponent<PlayerAnimationsControl>() : animationsControl; } }
+        #endregion
+        #region MonoBehaviour Methods
+        private void FixedUpdate()
         {
-            this.moveVector.x = moveVector.normalized.x;
-            this.moveVector.z = moveVector.normalized.y;
+            PlayerMove();
+            CheckJumping();
+            Debug.Log("ground " + IsGrounded());
         }
-    }
-    private void PlayerMove()
-    {
-        //Vector3 movement = new Vector3(moveVector.x, 0f, moveVector.z) * moveSpeed * Time.fixedDeltaTime;
-        //Rigidbody.MovePosition(Rigidbody.position + movement);
-        if (!isJumping)
+        #endregion
+        #region My Methods
+        public void SetMoveVector(Vector2 moveVector)
         {
-            Vector3 movement = new Vector3(moveVector.x, 0f, moveVector.z) * moveSpeed * Time.fixedDeltaTime;
+            if (canMove)
+            {
+                this.moveVector.x = moveVector.normalized.x;
+            }
+        }
+        private void PlayerMove()
+        {
+            Vector3 movement = new Vector3(moveVector.x, 0f, 0f) * moveSpeed * Time.fixedDeltaTime;
             Rigidbody.MovePosition(Rigidbody.position + movement);
-            Debug.Log("a");
+            SetPlayerDirection(moveVector.x);
         }
-        else
+        private void SetPlayerDirection(float x)
         {
-            Rigidbody.AddForce(moveVector * moveSpeed * Time.fixedDeltaTime);
-            Vector3 movement = new Vector3(moveVector.x * airControlFactor, 0f, moveVector.z * airControlFactor) * moveSpeed / 2 * Time.fixedDeltaTime;
-            Rigidbody.MovePosition(Rigidbody.position + movement);
-            Debug.Log("b");
+            AnimationsControl.SetPlayerDirection(x);
         }
-    }
-    public void PlayerJump()
-    {
-        if (canJump && IsGrounded())
+        public void PlayerJump()
         {
-            Rigidbody.AddForce(Vector3.up * jumpPower, ForceMode.Impulse);
-            isJumping = true;
+            if (canJump && IsGrounded())
+            {
+                Rigidbody.AddForce(Vector3.up * jumpPower, ForceMode.Impulse);
+                isJumping = true;
+            }
         }
-    }
-    private void CheckJumping()
-    {
-        isJumping = !IsGrounded();
-    }
-    private bool IsGrounded()
-    {
-        return Physics.CheckSphere(groundCheck.position, jumpCheckRadius, groundLayer);
-    }
-    #endregion
-    private void OnDrawGizmos()
-    {
-        Gizmos.color = Color.green;
-        Gizmos.DrawWireSphere(groundCheck.position, jumpCheckRadius);
+        private void CheckJumping()
+        {
+            isJumping = !IsGrounded();
+        }
+        private bool IsGrounded()
+        {
+            return Physics.CheckSphere(groundCheck.position, JUMP_CHECK_RADIUS, groundLayer);
+        }
+        #endregion
+        private void OnDrawGizmos()
+        {
+            Gizmos.color = Color.green;
+            Gizmos.DrawWireSphere(groundCheck.position, JUMP_CHECK_RADIUS);
+        }
     }
 }
