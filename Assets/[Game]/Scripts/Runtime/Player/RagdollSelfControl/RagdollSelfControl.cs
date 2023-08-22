@@ -1,92 +1,78 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class RagdollSelfControl : MonoBehaviour
 {
     public GameObject[] PlayerParts;
     public ConfigurableJoint[] JointParts;
     Vector3 COM;
-    public float TouchForce, TimeStep, LegsHeight, FallFactor;
-    float Step_R_Time, Step_L_Time;
-    public bool StepR, StepL,  WalkF, WalkB, Falling, Fall, StandUp;
-    bool flag, Flag_Leg_R, Flag_Leg_L;
-    Quaternion StartLegR1, StartLegR2, StartLegL1, StartLegL2;
-    JointDrive Spring0, Spring150, Spring300, Spring320;
+    [SerializeField] float touchForce, timeStep, legsHeight, fallFactor;
+    float step_R_Time, step_L_Time;
+    bool stepR, stepL,  walkF, walkB, falling, fall;
+    bool flag_Leg_R, flag_Leg_L;
+    Quaternion startLegR1, startLegR2, startLegL1, startLegL2;
+    JointDrive spring0, spring150, spring300, spring320;
 
     private void Awake()
     {
         Physics.IgnoreCollision(PlayerParts[2].GetComponent<Collider>(), PlayerParts[4].GetComponent<Collider>(), true);
         Physics.IgnoreCollision(PlayerParts[3].GetComponent<Collider>(), PlayerParts[7].GetComponent<Collider>(), true);
-        StartLegR1 = PlayerParts[4].GetComponent<ConfigurableJoint>().targetRotation;
-        StartLegR2 = PlayerParts[5].GetComponent<ConfigurableJoint>().targetRotation;
-        StartLegL1 = PlayerParts[7].GetComponent<ConfigurableJoint>().targetRotation;
-        StartLegL2 = PlayerParts[8].GetComponent<ConfigurableJoint>().targetRotation;
+        startLegR1 = PlayerParts[4].GetComponent<ConfigurableJoint>().targetRotation;
+        startLegR2 = PlayerParts[5].GetComponent<ConfigurableJoint>().targetRotation;
+        startLegL1 = PlayerParts[7].GetComponent<ConfigurableJoint>().targetRotation;
+        startLegL2 = PlayerParts[8].GetComponent<ConfigurableJoint>().targetRotation;
 
-        Spring0 = new JointDrive();
-        Spring0.positionSpring = 0;
-        Spring0.positionDamper = 0;
-        Spring0.maximumForce = Mathf.Infinity;
+        spring0 = new JointDrive();
+        spring0.positionSpring = 0;
+        spring0.positionDamper = 0;
+        spring0.maximumForce = Mathf.Infinity;
 
-        Spring150 = new JointDrive();
-        Spring150.positionSpring = 150;
-        Spring150.positionDamper = 0;
-        Spring150.maximumForce = Mathf.Infinity;
+        spring150 = new JointDrive();
+        spring150.positionSpring = 150;
+        spring150.positionDamper = 0;
+        spring150.maximumForce = Mathf.Infinity;
 
-        Spring300 = new JointDrive();
-        Spring300.positionSpring = 300;
-        Spring300.positionDamper = 100;
-        Spring300.maximumForce = Mathf.Infinity;
+        spring300 = new JointDrive();
+        spring300.positionSpring = 300;
+        spring300.positionDamper = 100;
+        spring300.maximumForce = Mathf.Infinity;
 
-        Spring320 = new JointDrive();
-        Spring320.positionSpring = 320;
-        Spring320.positionDamper = 0;
-        Spring320.maximumForce = Mathf.Infinity;
+        spring320 = new JointDrive();
+        spring320.positionSpring = 320;
+        spring320.positionDamper = 0;
+        spring320.maximumForce = Mathf.Infinity;
     }
 
     private void Update()
     {
-        PlayerParts[12].transform.position = Vector3.Lerp(PlayerParts[12].transform.position, PlayerParts[2].transform.position, 2 * Time.unscaledDeltaTime);
+        //PlayerParts[12].transform.position = Vector3.Lerp(PlayerParts[12].transform.position, PlayerParts[2].transform.position, 2 * Time.unscaledDeltaTime); //cam
 
         #region Input
         if (Input.GetKeyDown(KeyCode.UpArrow))
         {
-            PlayerParts[0].GetComponent<Rigidbody>().AddForce(Vector3.back * TouchForce, ForceMode.Impulse);
+            PlayerParts[0].GetComponent<Rigidbody>().AddForce(Vector3.back * touchForce, ForceMode.Impulse);
         }
         if (Input.GetKeyDown(KeyCode.DownArrow))
         {
-            PlayerParts[0].GetComponent<Rigidbody>().AddForce(Vector3.forward * TouchForce, ForceMode.Impulse);
+            PlayerParts[0].GetComponent<Rigidbody>().AddForce(Vector3.forward * touchForce, ForceMode.Impulse);
         }
-
-        if (Input.GetKeyDown(KeyCode.Space))
-            Application.LoadLevel(Application.loadedLevel);
-
-        if (Input.GetKeyDown(KeyCode.S))
-        {
-            if (Time.timeScale == 1)
-                Time.timeScale = 0.4f;
-            else
-                Time.timeScale = 1;
-        }
-
         #endregion
 
         Calculate_COM();
 
         PlayerParts[10].transform.position = COM;
-        
+
         Balance();
 
-        PlayerParts[11].transform.LookAt(PlayerParts[10].transform.position);
+        //PlayerParts[11].transform.LookAt(PlayerParts[10].transform.position);//cam
 
-        if (!WalkF && !WalkB)
+        if (!walkF && !walkB)
         {
-            StepR = false;
-            StepL = false;
-            Step_R_Time = 0;
-            Step_L_Time = 0;
-            Flag_Leg_R = false;
-            Flag_Leg_L = false;
+            stepR = false;
+            stepL = false;
+            step_R_Time = 0;
+            step_L_Time = 0;
+            flag_Leg_R = false;
+            flag_Leg_L = false;
             JointParts[0].targetRotation = Quaternion.Lerp(JointParts[0].targetRotation, new Quaternion(-0.1f, JointParts[0].targetRotation.y, JointParts[0].targetRotation.z, JointParts[0].targetRotation.w), 6 * Time.fixedDeltaTime);
         }
     }
@@ -100,189 +86,189 @@ public class RagdollSelfControl : MonoBehaviour
     {
         if (PlayerParts[10].transform.position.z < PlayerParts[6].transform.position.z && PlayerParts[10].transform.position.z < PlayerParts[9].transform.position.z)
         {
-            WalkB = true;
+            walkB = true;
             JointParts[0].targetRotation = Quaternion.Lerp(JointParts[0].targetRotation, new Quaternion(-0.1f, JointParts[0].targetRotation.y, JointParts[0].targetRotation.z, JointParts[0].targetRotation.w), 6 * Time.fixedDeltaTime);
         }
         else
         {
-            WalkB = false;
+            walkB = false;
         }
 
         if (PlayerParts[10].transform.position.z > PlayerParts[6].transform.position.z && PlayerParts[10].transform.position.z > PlayerParts[9].transform.position.z)
         {
-            WalkF = true;
+            walkF = true;
             JointParts[0].targetRotation = Quaternion.Lerp(JointParts[0].targetRotation, new Quaternion(0, JointParts[0].targetRotation.y, JointParts[0].targetRotation.z, JointParts[0].targetRotation.w), 6 * Time.fixedDeltaTime);
         }
         else
         {
-            WalkF = false;
+            walkF = false;
         }
 
-        if (PlayerParts[10].transform.position.z > PlayerParts[6].transform.position.z + FallFactor &&
-           PlayerParts[10].transform.position.z > PlayerParts[9].transform.position.z + FallFactor ||
-           PlayerParts[10].transform.position.z < PlayerParts[6].transform.position.z - (FallFactor + 0.2f) &&
-           PlayerParts[10].transform.position.z < PlayerParts[9].transform.position.z - (FallFactor + 0.2f))
+        if (PlayerParts[10].transform.position.z > PlayerParts[6].transform.position.z + fallFactor &&
+           PlayerParts[10].transform.position.z > PlayerParts[9].transform.position.z + fallFactor ||
+           PlayerParts[10].transform.position.z < PlayerParts[6].transform.position.z - (fallFactor + 0.2f) &&
+           PlayerParts[10].transform.position.z < PlayerParts[9].transform.position.z - (fallFactor + 0.2f))
         {
-            Falling = true;
+            falling = true;
         }
         else
         {
-            Falling = false;
+            falling = false;
         }
 
-        if (Falling)
+        if (falling)
         {
-            JointParts[1].angularXDrive = Spring0;
-            JointParts[1].angularYZDrive = Spring0;
-            LegsHeight = 5;
+            JointParts[1].angularXDrive = spring0;
+            JointParts[1].angularYZDrive = spring0;
+            legsHeight = 5;
         }
         else
         {
-            JointParts[1].angularXDrive = Spring300;
-            JointParts[1].angularYZDrive = Spring300;
-            LegsHeight = 1;
+            JointParts[1].angularXDrive = spring300;
+            JointParts[1].angularYZDrive = spring300;
+            legsHeight = 1;
             JointParts[2].targetRotation = Quaternion.Lerp(JointParts[2].targetRotation, new Quaternion(0, JointParts[2].targetRotation.y, JointParts[2].targetRotation.z, JointParts[2].targetRotation.w), 6 * Time.fixedDeltaTime);
             JointParts[3].targetRotation = Quaternion.Lerp(JointParts[3].targetRotation, new Quaternion(0, JointParts[3].targetRotation.y, JointParts[3].targetRotation.z, JointParts[3].targetRotation.w), 6 * Time.fixedDeltaTime);
-            JointParts[2].angularXDrive = Spring0;
-            JointParts[2].angularYZDrive = Spring150;
-            JointParts[3].angularXDrive = Spring0;
-            JointParts[3].angularYZDrive = Spring150;
+            JointParts[2].angularXDrive = spring0;
+            JointParts[2].angularYZDrive = spring150;
+            JointParts[3].angularXDrive = spring0;
+            JointParts[3].angularYZDrive = spring150;
         }
 
         if (PlayerParts[0].transform.position.y - 0.1f <= PlayerParts[1].transform.position.y)
         {
-            Fall = true;
+            fall = true;
         }
         else
         {
-            Fall = false;
+            fall = false;
         }
 
-        if (Fall)
+        if (fall)
         {
-            JointParts[1].angularXDrive = Spring0;
-            JointParts[1].angularYZDrive = Spring0;
+            JointParts[1].angularXDrive = spring0;
+            JointParts[1].angularYZDrive = spring0;
             StandUping();           
         }
     }
 
     void LegsMoving()
     {
-        if (WalkF)
+        if (walkF)
         {
-            if (PlayerParts[6].transform.position.z < PlayerParts[9].transform.position.z && !StepL && !Flag_Leg_R)
+            if (PlayerParts[6].transform.position.z < PlayerParts[9].transform.position.z && !stepL && !flag_Leg_R)
             {
-                StepR = true;
-                Flag_Leg_R = true;
-                Flag_Leg_L = true;
+                stepR = true;
+                flag_Leg_R = true;
+                flag_Leg_L = true;
             }
-            if (PlayerParts[6].transform.position.z > PlayerParts[9].transform.position.z && !StepR && !Flag_Leg_L)
+            if (PlayerParts[6].transform.position.z > PlayerParts[9].transform.position.z && !stepR && !flag_Leg_L)
             {
-                StepL = true;
-                Flag_Leg_L = true;
-                Flag_Leg_R = true;
+                stepL = true;
+                flag_Leg_L = true;
+                flag_Leg_R = true;
             }
         }
 
-        if (WalkB)
+        if (walkB)
         {
-            if (PlayerParts[6].transform.position.z > PlayerParts[9].transform.position.z && !StepL && !Flag_Leg_R)
+            if (PlayerParts[6].transform.position.z > PlayerParts[9].transform.position.z && !stepL && !flag_Leg_R)
             {
-                StepR = true;
-                Flag_Leg_R = true;
-                Flag_Leg_L = true;
+                stepR = true;
+                flag_Leg_R = true;
+                flag_Leg_L = true;
             }
-            if (PlayerParts[6].transform.position.z < PlayerParts[9].transform.position.z && !StepR && !Flag_Leg_L)
+            if (PlayerParts[6].transform.position.z < PlayerParts[9].transform.position.z && !stepR && !flag_Leg_L)
             {
-                StepL = true;
-                Flag_Leg_L = true;
-                Flag_Leg_R = true;
+                stepL = true;
+                flag_Leg_L = true;
+                flag_Leg_R = true;
             }
         }
 
-        if (StepR)
+        if (stepR)
         {
-            Step_R_Time += Time.fixedDeltaTime;
+            step_R_Time += Time.fixedDeltaTime;
 
-            if (WalkF)
+            if (walkF)
             {                
-                JointParts[4].targetRotation = new Quaternion(JointParts[4].targetRotation.x + 0.07f * LegsHeight, JointParts[4].targetRotation.y, JointParts[4].targetRotation.z, JointParts[4].targetRotation.w);
-                JointParts[5].targetRotation = new Quaternion(JointParts[5].targetRotation.x - 0.04f * LegsHeight * 2, JointParts[5].targetRotation.y, JointParts[5].targetRotation.z, JointParts[5].targetRotation.w);
+                JointParts[4].targetRotation = new Quaternion(JointParts[4].targetRotation.x + 0.07f * legsHeight, JointParts[4].targetRotation.y, JointParts[4].targetRotation.z, JointParts[4].targetRotation.w);
+                JointParts[5].targetRotation = new Quaternion(JointParts[5].targetRotation.x - 0.04f * legsHeight * 2, JointParts[5].targetRotation.y, JointParts[5].targetRotation.z, JointParts[5].targetRotation.w);
 
-                JointParts[7].targetRotation = new Quaternion(JointParts[7].targetRotation.x - 0.02f * LegsHeight / 2, JointParts[7].targetRotation.y, JointParts[7].targetRotation.z, JointParts[7].targetRotation.w);
+                JointParts[7].targetRotation = new Quaternion(JointParts[7].targetRotation.x - 0.02f * legsHeight / 2, JointParts[7].targetRotation.y, JointParts[7].targetRotation.z, JointParts[7].targetRotation.w);
             }
             
-            if (WalkB)
+            if (walkB)
             {
-                JointParts[4].targetRotation = new Quaternion(JointParts[4].targetRotation.x - 0.00f * LegsHeight, JointParts[4].targetRotation.y, JointParts[4].targetRotation.z, JointParts[4].targetRotation.w);
-                JointParts[5].targetRotation = new Quaternion(JointParts[5].targetRotation.x - 0.06f * LegsHeight * 2, JointParts[5].targetRotation.y, JointParts[5].targetRotation.z, JointParts[5].targetRotation.w);
+                JointParts[4].targetRotation = new Quaternion(JointParts[4].targetRotation.x - 0.00f * legsHeight, JointParts[4].targetRotation.y, JointParts[4].targetRotation.z, JointParts[4].targetRotation.w);
+                JointParts[5].targetRotation = new Quaternion(JointParts[5].targetRotation.x - 0.06f * legsHeight * 2, JointParts[5].targetRotation.y, JointParts[5].targetRotation.z, JointParts[5].targetRotation.w);
 
-                JointParts[7].targetRotation = new Quaternion(JointParts[7].targetRotation.x + 0.02f * LegsHeight / 2, JointParts[7].targetRotation.y, JointParts[7].targetRotation.z, JointParts[7].targetRotation.w);
+                JointParts[7].targetRotation = new Quaternion(JointParts[7].targetRotation.x + 0.02f * legsHeight / 2, JointParts[7].targetRotation.y, JointParts[7].targetRotation.z, JointParts[7].targetRotation.w);
             }
             
-            if (Step_R_Time > TimeStep)
+            if (step_R_Time > timeStep)
             {
-                Step_R_Time = 0;
-                StepR = false;
+                step_R_Time = 0;
+                stepR = false;
 
-                if (WalkB || WalkF)
+                if (walkB || walkF)
                 {
-                    StepL = true;
+                    stepL = true;
                 }
             }
         }
         else
         {
-            JointParts[4].targetRotation = Quaternion.Lerp(JointParts[4].targetRotation, StartLegR1, (8f) * Time.fixedDeltaTime);
-            JointParts[5].targetRotation = Quaternion.Lerp(JointParts[5].targetRotation, StartLegR2, (17f) * Time.fixedDeltaTime);
+            JointParts[4].targetRotation = Quaternion.Lerp(JointParts[4].targetRotation, startLegR1, (8f) * Time.fixedDeltaTime);
+            JointParts[5].targetRotation = Quaternion.Lerp(JointParts[5].targetRotation, startLegR2, (17f) * Time.fixedDeltaTime);
         }
 
-        if (StepL)
+        if (stepL)
         {
-            Step_L_Time += Time.fixedDeltaTime;
+            step_L_Time += Time.fixedDeltaTime;
 
-            if (WalkF)
+            if (walkF)
             {
-                JointParts[7].targetRotation = new Quaternion(JointParts[7].targetRotation.x + 0.07f * LegsHeight, JointParts[7].targetRotation.y, JointParts[7].targetRotation.z, JointParts[7].targetRotation.w);
-                JointParts[8].targetRotation = new Quaternion(JointParts[8].targetRotation.x - 0.04f * LegsHeight * 2, JointParts[8].targetRotation.y, JointParts[8].targetRotation.z, JointParts[8].targetRotation.w);
+                JointParts[7].targetRotation = new Quaternion(JointParts[7].targetRotation.x + 0.07f * legsHeight, JointParts[7].targetRotation.y, JointParts[7].targetRotation.z, JointParts[7].targetRotation.w);
+                JointParts[8].targetRotation = new Quaternion(JointParts[8].targetRotation.x - 0.04f * legsHeight * 2, JointParts[8].targetRotation.y, JointParts[8].targetRotation.z, JointParts[8].targetRotation.w);
 
-                JointParts[4].targetRotation = new Quaternion(JointParts[4].targetRotation.x - 0.02f * LegsHeight / 2, JointParts[4].targetRotation.y, JointParts[4].targetRotation.z, JointParts[4].targetRotation.w);
+                JointParts[4].targetRotation = new Quaternion(JointParts[4].targetRotation.x - 0.02f * legsHeight / 2, JointParts[4].targetRotation.y, JointParts[4].targetRotation.z, JointParts[4].targetRotation.w);
             }
             
-            if (WalkB)
+            if (walkB)
             {
-                JointParts[7].targetRotation = new Quaternion(JointParts[7].targetRotation.x - 0.00f * LegsHeight, JointParts[7].targetRotation.y, JointParts[7].targetRotation.z, JointParts[7].targetRotation.w);
-                JointParts[8].targetRotation = new Quaternion(JointParts[8].targetRotation.x - 0.06f * LegsHeight * 2, JointParts[8].targetRotation.y, JointParts[8].targetRotation.z, JointParts[8].targetRotation.w);
+                JointParts[7].targetRotation = new Quaternion(JointParts[7].targetRotation.x - 0.00f * legsHeight, JointParts[7].targetRotation.y, JointParts[7].targetRotation.z, JointParts[7].targetRotation.w);
+                JointParts[8].targetRotation = new Quaternion(JointParts[8].targetRotation.x - 0.06f * legsHeight * 2, JointParts[8].targetRotation.y, JointParts[8].targetRotation.z, JointParts[8].targetRotation.w);
 
-                JointParts[4].targetRotation = new Quaternion(JointParts[4].targetRotation.x + 0.02f * LegsHeight / 2, JointParts[4].targetRotation.y, JointParts[4].targetRotation.z, JointParts[4].targetRotation.w);
+                JointParts[4].targetRotation = new Quaternion(JointParts[4].targetRotation.x + 0.02f * legsHeight / 2, JointParts[4].targetRotation.y, JointParts[4].targetRotation.z, JointParts[4].targetRotation.w);
             }
 
-            if (Step_L_Time > TimeStep)
+            if (step_L_Time > timeStep)
             {
-                Step_L_Time = 0;
-                StepL = false;
+                step_L_Time = 0;
+                stepL = false;
 
-                if (WalkB || WalkF)
+                if (walkB || walkF)
                 {
-                    StepR = true;
+                    stepR = true;
                 }
             }
         }
         else
         {
-            JointParts[7].targetRotation = Quaternion.Lerp(JointParts[7].targetRotation, StartLegL1, (8) * Time.fixedDeltaTime);
-            JointParts[8].targetRotation = Quaternion.Lerp(JointParts[8].targetRotation, StartLegL2, (17) * Time.fixedDeltaTime);
+            JointParts[7].targetRotation = Quaternion.Lerp(JointParts[7].targetRotation, startLegL1, (8) * Time.fixedDeltaTime);
+            JointParts[8].targetRotation = Quaternion.Lerp(JointParts[8].targetRotation, startLegL2, (17) * Time.fixedDeltaTime);
         }
     }
 
     void StandUping()
     {
-        if (WalkF)
+        if (walkF)
         {
-            JointParts[2].angularXDrive = Spring320;
-            JointParts[2].angularYZDrive = Spring320;
-            JointParts[3].angularXDrive = Spring320;
-            JointParts[3].angularYZDrive = Spring320;
+            JointParts[2].angularXDrive = spring320;
+            JointParts[2].angularYZDrive = spring320;
+            JointParts[3].angularXDrive = spring320;
+            JointParts[3].angularYZDrive = spring320;
             JointParts[0].targetRotation = Quaternion.Lerp(JointParts[0].targetRotation, new Quaternion(-0.1f, JointParts[0].targetRotation.y, 
                 JointParts[0].targetRotation.z, JointParts[0].targetRotation.w), 6 * Time.fixedDeltaTime);
 
@@ -299,12 +285,12 @@ public class RagdollSelfControl : MonoBehaviour
             }
         }
 
-        if (WalkB)
+        if (walkB)
         {
-            JointParts[2].angularXDrive = Spring320;
-            JointParts[2].angularYZDrive = Spring320;
-            JointParts[3].angularXDrive = Spring320;
-            JointParts[3].angularYZDrive = Spring320;
+            JointParts[2].angularXDrive = spring320;
+            JointParts[2].angularYZDrive = spring320;
+            JointParts[3].angularXDrive = spring320;
+            JointParts[3].angularYZDrive = spring320;
 
             if (JointParts[2].targetRotation.x > -1.7f)
             {
