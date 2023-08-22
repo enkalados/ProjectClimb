@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Example : MonoBehaviour
+public class RagdollSelfControl : MonoBehaviour
 {
     public GameObject[] PlayerParts;
     public ConfigurableJoint[] JointParts;
