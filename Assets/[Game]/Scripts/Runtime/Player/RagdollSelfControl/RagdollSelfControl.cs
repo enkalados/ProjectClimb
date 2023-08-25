@@ -7,7 +7,7 @@ public class RagdollSelfControl : MonoBehaviour
     Vector3 COM;
     [SerializeField] float touchForce, timeStep, legsHeight, fallFactor;
     float step_R_Time, step_L_Time;
-    bool stepR, stepL,  walkF, walkB, falling, fall;
+    bool stepR, stepL, walkF, walkB, falling, fall;
     bool flag_Leg_R, flag_Leg_L;
     Quaternion startLegR1, startLegR2, startLegL1, startLegL2;
     JointDrive spring0, spring150, spring300, spring320;
@@ -49,7 +49,7 @@ public class RagdollSelfControl : MonoBehaviour
         #region Input
         if (Input.GetKeyDown(KeyCode.UpArrow))
         {
-            PlayerParts[0].GetComponent<Rigidbody>().AddForce(Vector3.back * touchForce, ForceMode.Impulse);
+
         }
         if (Input.GetKeyDown(KeyCode.DownArrow))
         {
@@ -78,7 +78,7 @@ public class RagdollSelfControl : MonoBehaviour
     }
 
     private void FixedUpdate()
-    {      
+    {
         LegsMoving();
     }
 
@@ -148,7 +148,7 @@ public class RagdollSelfControl : MonoBehaviour
         {
             JointParts[1].angularXDrive = spring0;
             JointParts[1].angularYZDrive = spring0;
-            StandUping();           
+            StandUping();
         }
     }
 
@@ -191,13 +191,13 @@ public class RagdollSelfControl : MonoBehaviour
             step_R_Time += Time.fixedDeltaTime;
 
             if (walkF)
-            {                
+            {
                 JointParts[4].targetRotation = new Quaternion(JointParts[4].targetRotation.x + 0.07f * legsHeight, JointParts[4].targetRotation.y, JointParts[4].targetRotation.z, JointParts[4].targetRotation.w);
                 JointParts[5].targetRotation = new Quaternion(JointParts[5].targetRotation.x - 0.04f * legsHeight * 2, JointParts[5].targetRotation.y, JointParts[5].targetRotation.z, JointParts[5].targetRotation.w);
 
                 JointParts[7].targetRotation = new Quaternion(JointParts[7].targetRotation.x - 0.02f * legsHeight / 2, JointParts[7].targetRotation.y, JointParts[7].targetRotation.z, JointParts[7].targetRotation.w);
             }
-            
+
             if (walkB)
             {
                 JointParts[4].targetRotation = new Quaternion(JointParts[4].targetRotation.x - 0.00f * legsHeight, JointParts[4].targetRotation.y, JointParts[4].targetRotation.z, JointParts[4].targetRotation.w);
@@ -205,7 +205,7 @@ public class RagdollSelfControl : MonoBehaviour
 
                 JointParts[7].targetRotation = new Quaternion(JointParts[7].targetRotation.x + 0.02f * legsHeight / 2, JointParts[7].targetRotation.y, JointParts[7].targetRotation.z, JointParts[7].targetRotation.w);
             }
-            
+
             if (step_R_Time > timeStep)
             {
                 step_R_Time = 0;
@@ -234,7 +234,7 @@ public class RagdollSelfControl : MonoBehaviour
 
                 JointParts[4].targetRotation = new Quaternion(JointParts[4].targetRotation.x - 0.02f * legsHeight / 2, JointParts[4].targetRotation.y, JointParts[4].targetRotation.z, JointParts[4].targetRotation.w);
             }
-            
+
             if (walkB)
             {
                 JointParts[7].targetRotation = new Quaternion(JointParts[7].targetRotation.x - 0.00f * legsHeight, JointParts[7].targetRotation.y, JointParts[7].targetRotation.z, JointParts[7].targetRotation.w);
@@ -269,18 +269,18 @@ public class RagdollSelfControl : MonoBehaviour
             JointParts[2].angularYZDrive = spring320;
             JointParts[3].angularXDrive = spring320;
             JointParts[3].angularYZDrive = spring320;
-            JointParts[0].targetRotation = Quaternion.Lerp(JointParts[0].targetRotation, new Quaternion(-0.1f, JointParts[0].targetRotation.y, 
+            JointParts[0].targetRotation = Quaternion.Lerp(JointParts[0].targetRotation, new Quaternion(-0.1f, JointParts[0].targetRotation.y,
                 JointParts[0].targetRotation.z, JointParts[0].targetRotation.w), 6 * Time.fixedDeltaTime);
 
             if (JointParts[2].targetRotation.x < 1.7f)
             {
-                JointParts[2].targetRotation = new Quaternion(JointParts[2].targetRotation.x + 0.07f, JointParts[2].targetRotation.y, 
+                JointParts[2].targetRotation = new Quaternion(JointParts[2].targetRotation.x + 0.07f, JointParts[2].targetRotation.y,
                     JointParts[2].targetRotation.z, JointParts[2].targetRotation.w);
             }
 
             if (JointParts[3].targetRotation.x < 1.7f)
             {
-                JointParts[3].targetRotation = new Quaternion(JointParts[3].targetRotation.x + 0.07f, JointParts[3].targetRotation.y, 
+                JointParts[3].targetRotation = new Quaternion(JointParts[3].targetRotation.x + 0.07f, JointParts[3].targetRotation.y,
                     JointParts[3].targetRotation.z, JointParts[3].targetRotation.w);
             }
         }
@@ -294,13 +294,13 @@ public class RagdollSelfControl : MonoBehaviour
 
             if (JointParts[2].targetRotation.x > -1.7f)
             {
-                JointParts[2].targetRotation = new Quaternion(JointParts[2].targetRotation.x - 0.09f, JointParts[2].targetRotation.y, 
+                JointParts[2].targetRotation = new Quaternion(JointParts[2].targetRotation.x - 0.09f, JointParts[2].targetRotation.y,
                     JointParts[2].targetRotation.z, JointParts[2].targetRotation.w);
             }
 
             if (JointParts[3].targetRotation.x > -1.7f)
             {
-                JointParts[3].targetRotation = new Quaternion(JointParts[3].targetRotation.x - 0.09f, JointParts[3].targetRotation.y, 
+                JointParts[3].targetRotation = new Quaternion(JointParts[3].targetRotation.x - 0.09f, JointParts[3].targetRotation.y,
                     JointParts[3].targetRotation.z, JointParts[3].targetRotation.w);
             }
         }
@@ -308,7 +308,7 @@ public class RagdollSelfControl : MonoBehaviour
 
     void Calculate_COM()
     {
-        COM = (JointParts[0].GetComponent<Rigidbody>().mass * JointParts[0].transform.position + 
+        COM = (JointParts[0].GetComponent<Rigidbody>().mass * JointParts[0].transform.position +
             JointParts[1].GetComponent<Rigidbody>().mass * JointParts[1].transform.position +
             JointParts[2].GetComponent<Rigidbody>().mass * JointParts[2].transform.position +
             JointParts[3].GetComponent<Rigidbody>().mass * JointParts[3].transform.position +
@@ -323,5 +323,10 @@ public class RagdollSelfControl : MonoBehaviour
             JointParts[4].GetComponent<Rigidbody>().mass + JointParts[5].GetComponent<Rigidbody>().mass +
             JointParts[6].GetComponent<Rigidbody>().mass + JointParts[7].GetComponent<Rigidbody>().mass +
             JointParts[8].GetComponent<Rigidbody>().mass + JointParts[9].GetComponent<Rigidbody>().mass);
+    }
+    public void ForceToBody(Vector3 dir, float force)
+    {
+        //PlayerParts[0].GetComponent<Rigidbody>().AddForce(Vector3.back * touchForce, ForceMode.Impulse);
+        PlayerParts[0].GetComponent<Rigidbody>().AddForce(dir * force, ForceMode.Impulse);
     }
 }

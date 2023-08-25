@@ -5,7 +5,6 @@ using Player.AnimationsControl;
 namespace Player.MovementControl
 {
     [RequireComponent(typeof(PlayerInputControl))]
-    [RequireComponent(typeof(PlayerAnimationsControl))]
     public class PlayerMovementControl : MonoBehaviour
     {
         #region Variables
@@ -15,25 +14,23 @@ namespace Player.MovementControl
 
         private bool canJump = true;
         private bool isJumping;
+        [SerializeField] float moveForce;
         [SerializeField] float jumpPower;
         [SerializeField] LayerMask groundLayer;
         [SerializeField] Transform groundCheck;
         const float JUMP_CHECK_RADIUS = .1f;
-        const float AIR_CONTROL_FACTOR = .5f;
-
         #endregion
         #region Properties
-        private Rigidbody rigidbody;
-        private Rigidbody Rigidbody { get { return (rigidbody == null) ? rigidbody = GetComponent<Rigidbody>() : rigidbody; } }
         private PlayerAnimationsControl animationsControl;
         private PlayerAnimationsControl AnimationsControl { get { return (animationsControl == null) ? animationsControl = GetComponent<PlayerAnimationsControl>() : animationsControl; } }
+        private RagdollSelfControl ragdollSelfControl;
+        private RagdollSelfControl RagdollSelfControl { get { return (ragdollSelfControl == null) ? ragdollSelfControl = GetComponent<RagdollSelfControl>() : ragdollSelfControl; } }
         #endregion
         #region MonoBehaviour Methods
         private void FixedUpdate()
         {
             PlayerMove();
             CheckJumping();
-            Debug.Log("ground " + IsGrounded());
         }
         #endregion
         #region My Methods
@@ -46,19 +43,21 @@ namespace Player.MovementControl
         }
         private void PlayerMove()
         {
-            Vector3 movement = new Vector3(moveVector.x, 0f, 0f) * moveSpeed * Time.fixedDeltaTime;
-            Rigidbody.MovePosition(Rigidbody.position + movement);
-            SetPlayerDirection(moveVector.x);
-        }
-        private void SetPlayerDirection(float x)
-        {
-            AnimationsControl.SetPlayerDirection(x);
+            Debug.Log(moveVector);
+            if (moveVector.x>0)
+            {
+                RagdollSelfControl.ForceToBody(Vector3.forward, moveForce);
+            }
+            else if (moveVector.x<0)
+            {
+                RagdollSelfControl.ForceToBody(Vector3.back, moveForce);
+            }
         }
         public void PlayerJump()
         {
             if (canJump && IsGrounded())
             {
-                Rigidbody.AddForce(Vector3.up * jumpPower, ForceMode.Impulse);
+                RagdollSelfControl.ForceToBody(Vector3.up, jumpPower);
                 isJumping = true;
             }
         }
