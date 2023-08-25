@@ -43,7 +43,6 @@ namespace Player.MovementControl
         }
         private void PlayerMove()
         {
-            Debug.Log(moveVector);
             if (moveVector.x>0)
             {
                 RagdollSelfControl.ForceToBody(Vector3.forward, moveForce);
