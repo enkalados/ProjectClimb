@@ -16,6 +16,7 @@ namespace Player.MovementControl
         private bool isJumping;
         [SerializeField] float moveForce;
         [SerializeField] float jumpPower;
+        [SerializeField] float crouchPower;
         [SerializeField] LayerMask groundLayer;
         [SerializeField] Transform groundCheck;
         const float JUMP_CHECK_RADIUS = .1f;
@@ -38,7 +39,7 @@ namespace Player.MovementControl
         {
             if (canMove)
             {
-                this.moveVector.x = moveVector.normalized.x;
+                this.moveVector = moveVector.normalized;
             }
         }
         private void PlayerMove()
@@ -51,6 +52,10 @@ namespace Player.MovementControl
             {
                 RagdollSelfControl.ForceToBody(Vector3.back, moveForce);
             }
+            if (moveVector.y<0)
+            {
+                PlayerCrouch();
+            }
         }
         public void PlayerJump()
         {
@@ -59,6 +64,10 @@ namespace Player.MovementControl
                 RagdollSelfControl.ForceToBody(Vector3.up, jumpPower);
                 isJumping = true;
             }
+        }
+        public void PlayerCrouch()
+        {
+            RagdollSelfControl.ForceToBody(Vector3.down, crouchPower);
         }
         private void CheckJumping()
         {

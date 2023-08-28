@@ -46,17 +46,6 @@ public class RagdollSelfControl : MonoBehaviour
     {
         //PlayerParts[12].transform.position = Vector3.Lerp(PlayerParts[12].transform.position, PlayerParts[2].transform.position, 2 * Time.unscaledDeltaTime); //cam
 
-        #region Input
-        if (Input.GetKeyDown(KeyCode.UpArrow))
-        {
-
-        }
-        if (Input.GetKeyDown(KeyCode.DownArrow))
-        {
-            PlayerParts[0].GetComponent<Rigidbody>().AddForce(Vector3.forward * touchForce, ForceMode.Impulse);
-        }
-        #endregion
-
         Calculate_COM();
 
         PlayerParts[10].transform.position = COM;

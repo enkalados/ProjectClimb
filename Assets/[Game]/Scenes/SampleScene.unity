@@ -4306,6 +4306,7 @@ MonoBehaviour:
   moveSpeed: 5
   moveForce: 5
   jumpPower: 110
+  crouchPower: 50
   groundLayer:
     serializedVersion: 2
     m_Bits: 64
@@ -4380,10 +4381,6 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: 514894e1-7467-49c8-81b7-c7a289e1c2e5
     m_ActionName: Player/Jump[/Keyboard/space]
-  - m_PersistentCalls:
-      m_Calls: []
-    m_ActionId: c3b9db1e-e543-4bbe-b01a-a3f71cfe61e8
-    m_ActionName: Player/Crouch[/Keyboard/s,/Keyboard/downArrow]
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player
