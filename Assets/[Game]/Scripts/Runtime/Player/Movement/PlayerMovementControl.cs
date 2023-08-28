@@ -4,12 +4,11 @@ using Player.AnimationsControl;
 
 namespace Player.MovementControl
 {
-    [RequireComponent(typeof(PlayerInputControl))]
+    //[RequireComponent(typeof(PlayerInputControl))]
     public class PlayerMovementControl : MonoBehaviour
     {
         #region Variables
         private bool canMove = true;
-        [SerializeField] float moveSpeed;
         private Vector3 moveVector = Vector3.zero;
 
         private bool canJump = true;
@@ -22,8 +21,6 @@ namespace Player.MovementControl
         const float JUMP_CHECK_RADIUS = .1f;
         #endregion
         #region Properties
-        private PlayerAnimationsControl animationsControl;
-        private PlayerAnimationsControl AnimationsControl { get { return (animationsControl == null) ? animationsControl = GetComponent<PlayerAnimationsControl>() : animationsControl; } }
         private RagdollSelfControl ragdollSelfControl;
         private RagdollSelfControl RagdollSelfControl { get { return (ragdollSelfControl == null) ? ragdollSelfControl = GetComponent<RagdollSelfControl>() : ragdollSelfControl; } }
         #endregion
@@ -59,7 +56,7 @@ namespace Player.MovementControl
         }
         public void PlayerJump()
         {
-            if (canJump && IsGrounded())
+            if (canJump && !isJumping)
             {
                 RagdollSelfControl.ForceToBody(Vector3.up, jumpPower);
                 isJumping = true;
